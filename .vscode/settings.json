@@ -1,0 +1,26 @@
+{
+  "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "*.template": "html",
+    "cmath": "cpp",
+    "cstddef": "cpp",
+    "cstdint": "cpp",
+    "cstdio": "cpp",
+    "cstdlib": "cpp",
+    "cstring": "cpp",
+    "cwchar": "cpp",
+    "exception": "cpp",
+    "initializer_list": "cpp",
+    "iosfwd": "cpp",
+    "limits": "cpp",
+    "new": "cpp",
+    "optional": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "xmemory0": "cpp",
+    "xstddef": "cpp",
+    "xtr1common": "cpp",
+    "xutility": "cpp"
+  }
+}
