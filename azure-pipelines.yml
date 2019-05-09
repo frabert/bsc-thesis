@@ -12,5 +12,6 @@ pool:
 steps:
 - script: sudo apt-get install g++-8
 - script: g++-8 -std=c++17 logic.cpp
+- script: sudo apt-get update
 - script: sudo apt-get install texlive
 - script: pdflatex thesis/main.tex
