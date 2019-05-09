@@ -4,6 +4,7 @@
 #include "logic.hpp"
 #include <limits>
 #include <optional>
+#include <stdexcept>
 #include <type_traits>
 
 namespace logic {
