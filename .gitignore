@@ -1,3 +1,6 @@
 .vscode/cquery_cached_index
 .vscode/ipch
 build
+a.out
+*.obj
+*.o

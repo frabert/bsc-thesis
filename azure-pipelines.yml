@@ -10,6 +10,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: sudo apt install g++-8
-
-- script: g++ logic.cpp
+- script: sudo apt-get install g++-8
+- script: ls
+- script: g++8 logic.cpp
+- script: sudo apt-get install texlive
