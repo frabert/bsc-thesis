@@ -2,58 +2,44 @@
 #include "safe.hpp"
 #include "safe_array.hpp"
 
+using namespace logic;
+
 int main() {
-  logic::sequent<
-   logic::list<logic::and_term<
-    logic::greater<int, 1>,
-    logic::or_term<logic::less_equal<int, 2>, logic::less_equal<int, 3>>>>,
-   logic::list<logic::or_term<
-    logic::and_term<logic::greater<int, 1>, logic::less_equal<int, 2>>,
-    logic::and_term<logic::greater<int, 1>, logic::less_equal<int, 3>>>>>
+  sequent<list<and_term<greater<int, 1>,
+                        or_term<less_equal<int, 2>, less_equal<int, 3>>>>,
+          list<or_term<and_term<greater<int, 1>, less_equal<int, 2>>,
+                       and_term<greater<int, 1>, less_equal<int, 3>>>>>
    distrib;
 
-  logic::sequent<logic::list<>,
-                 logic::list<logic::or_term<logic::less<int, 1>,
-                                            logic::greater_equal<int, 1>>>>
-   taut;
+  sequent<list<>, list<or_term<less<int, 1>, greater_equal<int, 1>>>> taut;
 
-  logic::sequent<
-   logic::list<logic::or_term<logic::less<int, 1>, logic::less<int, 2>>>,
-   logic::list<logic::or_term<logic::less<int, 1>, logic::less<int, 2>>>>
+  sequent<list<or_term<less<int, 1>, less<int, 2>>>,
+          list<or_term<less<int, 1>, less<int, 2>>>>
    taut_2;
 
-  logic::sequent<logic::list<logic::less<int, 1>>,
-                 logic::list<logic::less<int, 2>>>
-   taut_3;
+  sequent<list<less<int, 1>>, list<less<int, 2>>> taut_3;
 
-  logic::sequent<
-   logic::list<logic::and_term<logic::less<int, 10>, logic::greater<int, 5>>>,
-   logic::list<logic::and_term<logic::less<int, 20>, logic::greater<int, 0>>>>
+  sequent<list<and_term<less<int, 10>, greater<int, 5>>>,
+          list<and_term<less<int, 20>, greater<int, 0>>>>
    taut_4;
 
-  logic::sequent<
-   logic::list<logic::or_term<logic::less<int, 1>, logic::less<int, 2>>>,
-   logic::list<logic::and_term<logic::less<int, 1>, logic::less<int, 2>>>>
+  sequent<list<or_term<less<int, 1>, less<int, 2>>>,
+          list<and_term<less<int, 1>, less<int, 2>>>>
    untrue;
 
-  static_assert(logic::truth_value<decltype(taut)>,
-                "This formula is a tautology");
-  static_assert(logic::truth_value<decltype(taut_2)>,
-                "This formula is a tautology");
-  static_assert(logic::truth_value<decltype(taut_3)>,
-                "This formula is a tautology");
-  static_assert(logic::truth_value<decltype(taut_4)>,
-                "This formula is a tautology");
-  static_assert(logic::truth_value<decltype(distrib)>, "Distributivity works");
-  static_assert(!(logic::truth_value<decltype(untrue)>),
+  static_assert(truth_value<decltype(taut)>, "This formula is a tautology");
+  static_assert(truth_value<decltype(taut_2)>, "This formula is a tautology");
+  static_assert(truth_value<decltype(taut_3)>, "This formula is a tautology");
+  static_assert(truth_value<decltype(taut_4)>, "This formula is a tautology");
+  static_assert(truth_value<decltype(distrib)>, "Distributivity works");
+  static_assert(!(truth_value<decltype(untrue)>),
                 "This formula is not always true");
 
-  constexpr bool val = logic::truth_value<decltype(taut_4)>;
+  constexpr bool val = truth_value<decltype(taut_4)>;
 
   auto s =
-   logic::safe<int, logic::and_term<logic::greater<int, 10>,
-                                    logic::less<int, 20>>>::make_safe<15>();
-  auto s2 = logic::make_safe<int, 15>();
+   safe<int, and_term<greater<int, 10>, less<int, 20>>>::make_safe<15>();
+  auto s2 = make_safe<int, 15>();
 
   decltype(s) s3{s2};
 
@@ -61,10 +47,14 @@ int main() {
 
   auto s4 = s + s2;
 
-  logic::safe_array<int, 4> arr{1, 2, 3, 4};
-  auto v1 =
-   logic::safe<std::size_t, logic::less<std::size_t, 3>>::make_safe<2>();
-  int x = arr[v1];
+  safe_array<int, 4> arr{1, 2, 3, 4};
+  auto idx1 = safe<std::size_t, less<std::size_t, 3>>::make_safe<2>();
+  int x = arr[idx1];
+
+  auto idx2 = safe<std::size_t, and_term<greater<std::size_t, 1>,
+                                         less<std::size_t, 5>>>::make_safe<3>();
+  // The following line will not compile, as idx2 might cause an out-of-bounds
+  // access int y = arr[idx2];
 
   return val ? 0 : 1;
   return 0;
