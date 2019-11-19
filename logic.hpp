@@ -5,6 +5,22 @@
 
 namespace logic {
   // Nonterminal terms
+  /*
+   The `type` definition inside of the various terms is used to let users
+   specify constraints using "short-hand" notation: for example,
+
+      greater<int, 10>
+
+   can be used instead of
+
+      not_term<less_equal<int, 10>>
+
+   even though `greater` is, strictly speaking, not part of the available
+   constraints.
+
+   When a term is already a "native" constraint, the `type` definition is just
+   the constraint itself.
+  */
   template <typename T> struct not_term {
     using type = not_term<typename T::type>;
   };
@@ -50,6 +66,9 @@ namespace logic {
   };
 
   // Inference rules
+  /*
+   Implementation of the rules specified in section 2.2 of the thesis
+  */
   template <typename L, typename R> struct satisfies;
 
   template <typename T1, typename T2, T1 Val1, T2 Val2>
@@ -80,6 +99,31 @@ namespace logic {
   struct sequent<list<Ls...>, list<Rs...>> {};
 
   // Axioms
+  /*
+   `proof` implements an algorithm for solving propositional calculus formulas
+   using sequent calculus.
+
+   `B` is the current sequent being evaluated, while `A` and `C` are helper
+   lists used to implement the algorithm.
+
+   The algorithm is as follows:
+    1. The first element from the right side of the sequent is extracted.
+       If it is not a terminal, it is subdivided (for example, an `or` term
+       is subdivided and added to the right side of the sequent) and a new
+       element is extracted. Repeat as long the extracted term is not terminal.
+    2. The first element from the left side of the sequent is extracted.
+       If it is not a terminal, it is subdivided (for example, an `and` term
+       is subdivided and added to the left side of the sequent) and a new
+       element is extracted. Repeat as long the extracted term is not terminal.
+    3. If the element extracted from the left side can be used to prove the
+       element extracted from the right side, the algorithm stops with a "true"
+       value. Otherwise, the element from the left side is put into `A`. New
+       elements will be extracted from the left side and put into `A` as long as
+       the element on the right side cannot be proved. When the left side is
+       empty, the element on the right side is put into `C` and the elements in
+       `A` are put back into the left side.
+    4. When both sides are empty, the algorithm stops with a "false" value.
+  */
   template <typename A, typename B, typename C, typename Enable = void>
   struct proof;
 
