@@ -32,6 +32,8 @@ namespace logic {
   };
 
   template <typename T1, typename T2> struct concat;
+  template <typename T1, typename T2>
+  using concat_t = typename concat<T1, T2>::type;
 
   template <typename... T1, typename... T2>
   struct concat<and_term<T1...>, and_term<T2...>> {
@@ -322,6 +324,8 @@ namespace logic {
   }
 
   template <typename T1, typename T2> struct simplify;
+  template <typename T1, typename T2>
+  using simplify_t = typename simplify<T1, T2>::type;
 
   template <typename... Ts> struct simplify<and_term<Ts...>, and_term<>> {
     using type = and_term<Ts...>;
@@ -332,71 +336,67 @@ namespace logic {
                   and_term<less<T, Value2>, Ts...>> {
     using _temp = typename std::conditional<(Value2 < Value1), less<T, Value2>,
                                             less<T, Value1>>::type;
-    using type = typename simplify<and_term<_temp, T1>, and_term<Ts...>>::type;
+    using type = simplify_t<and_term<_temp, T1>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<less<T, Value1>, T1>,
                   and_term<less_equal<T, Value2>, Ts...>> {
-    using _temp =
-     typename std::conditional<(Value2 < Value1), less_equal<T, Value2>,
-                               less<T, Value1>>::type;
-    using type = typename simplify<and_term<_temp, T1>, and_term<Ts...>>::type;
+    using _temp = std::conditional_t<(Value2 < Value1), less_equal<T, Value2>,
+                                     less<T, Value1>>;
+    using type = simplify_t<and_term<_temp, T1>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<less_equal<T, Value1>, T1>,
                   and_term<less<T, Value2>, Ts...>> {
-    using _temp =
-     typename std::conditional<(Value1 < Value2), less_equal<T, Value1>,
-                               less<T, Value2>>::type;
-    using type = typename simplify<and_term<_temp, T1>, and_term<Ts...>>::type;
+    using _temp = std::conditional_t<(Value1 < Value2), less_equal<T, Value1>,
+                                     less<T, Value2>>;
+    using type = simplify_t<and_term<_temp, T1>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<less_equal<T, Value1>, T1>,
                   and_term<less_equal<T, Value2>, Ts...>> {
-    using _temp =
-     typename std::conditional<(Value1 < Value2), less_equal<T, Value1>,
-                               less_equal<T, Value2>>::type;
-    using type = typename simplify<and_term<_temp, T1>, and_term<Ts...>>::type;
+    using _temp = std::conditional_t<(Value1 < Value2), less_equal<T, Value1>,
+                                     less_equal<T, Value2>>;
+    using type = simplify_t<and_term<_temp, T1>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<T1, not_term<less_equal<T, Value1>>>,
                   and_term<not_term<less_equal<T, Value2>>, Ts...>> {
     using _temp =
-     typename std::conditional<(Value1 > Value2),
-                               not_term<less_equal<T, Value1>>,
-                               not_term<less_equal<T, Value2>>>::type;
-    using type = typename simplify<and_term<T1, _temp>, and_term<Ts...>>::type;
+     std::conditional_t<(Value1 > Value2), not_term<less_equal<T, Value1>>,
+                        not_term<less_equal<T, Value2>>>;
+    using type = simplify_t<and_term<T1, _temp>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<T1, not_term<less_equal<T, Value1>>>,
                   and_term<not_term<less<T, Value2>>, Ts...>> {
     using _temp =
-     typename std::conditional<(Value2 > Value1), not_term<less<T, Value2>>,
-                               not_term<less_equal<T, Value1>>>::type;
-    using type = typename simplify<and_term<T1, _temp>, and_term<Ts...>>::type;
+     std::conditional_t<(Value2 > Value1), not_term<less<T, Value2>>,
+                        not_term<less_equal<T, Value1>>>;
+    using type = simplify_t<and_term<T1, _temp>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<T1, not_term<less<T, Value1>>>,
                   and_term<not_term<less_equal<T, Value2>>, Ts...>> {
     using _temp =
-     typename std::conditional<(Value1 > Value2), not_term<less<T, Value1>>,
-                               not_term<less_equal<T, Value2>>>::type;
-    using type = typename simplify<and_term<T1, _temp>, and_term<Ts...>>::type;
+     std::conditional_t<(Value1 > Value2), not_term<less<T, Value1>>,
+                        not_term<less_equal<T, Value2>>>;
+    using type = simplify_t<and_term<T1, _temp>, and_term<Ts...>>;
   };
 
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<T1, not_term<less<T, Value1>>>,
                   and_term<not_term<less<T, Value2>>, Ts...>> {
     using _temp =
-     typename std::conditional<(Value1 > Value2), not_term<less<T, Value1>>,
-                               not_term<less<T, Value2>>>::type;
-    using type = typename simplify<and_term<T1, _temp>, and_term<Ts...>>::type;
+     std::conditional_t<(Value1 > Value2), not_term<less<T, Value1>>,
+                        not_term<less<T, Value2>>>;
+    using type = simplify_t<and_term<T1, _temp>, and_term<Ts...>>;
   };
 } // namespace logic
 

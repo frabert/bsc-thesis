@@ -62,6 +62,28 @@ int main() {
     auto c = a * b;
   }
 
+  {
+    auto a =
+     safe<int, or_term<and_term<greater_equal<int, 10>, less_equal<int, 20>>,
+                       and_term<greater<int, 25>, less_equal<int, 40>>>>::
+      make_safe<26>();
+
+    decltype(a) b = decltype(a)::make_safe<15>();
+
+    auto c = a + b;
+  }
+
+  {
+    auto a =
+     safe<int, or_term<and_term<greater_equal<int, 10>, less_equal<int, 20>>,
+                       and_term<greater<int, 25>, less_equal<int, 40>>>>::
+      make_safe<26>();
+
+    decltype(a) b = decltype(a)::make_safe<15>();
+
+    auto c = a - b;
+  }
+
   // You can use print_type<T> to produce a compile error that will print the
   // full type of T. Uncommenting the following line will print the type of s5
   /// print_type<decltype(s5)> foo;
