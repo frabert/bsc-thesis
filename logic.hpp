@@ -137,16 +137,14 @@ namespace logic {
   template <typename L, typename R, typename... Ls, typename... Rs,
             typename... As, typename... Cs>
   struct proof<list<As...>, sequent<list<L, Ls...>, list<R, Rs...>>,
-               list<Cs...>,
-               typename std::enable_if<satisfies<L, R>::value>::type> {
+               list<Cs...>, std::enable_if_t<satisfies<L, R>::value>> {
     static constexpr bool value = true;
   };
 
   template <typename L, typename R, typename... Ls, typename... Rs,
             typename... As, typename... Cs>
   struct proof<list<As...>, sequent<list<L, Ls...>, list<R, Rs...>>,
-               list<Cs...>,
-               typename std::enable_if<!(satisfies<L, R>::value)>::type> {
+               list<Cs...>, std::enable_if_t<!(satisfies<L, R>::value)>> {
     static constexpr bool value =
      proof<list<L, As...>, sequent<list<Ls...>, list<R, Cs..., Rs...>>,
            list<>>::value;
@@ -163,7 +161,7 @@ namespace logic {
             typename... Rs, typename... Cs>
   struct proof<list<As...>,
                sequent<list<T, Ls...>, list<or_term<Ts...>, Rs...>>,
-               list<Cs...>, typename std::enable_if<is_terminal<T>>::type> {
+               list<Cs...>, std::enable_if_t<is_terminal<T>>> {
     static constexpr bool value = proof<
      list<>,
      sequent<
@@ -175,7 +173,7 @@ namespace logic {
   template <typename L, typename T, typename... As, typename... Ls,
             typename... Rs, typename... Cs>
   struct proof<list<As...>, sequent<list<L, Ls...>, list<not_term<T>, Rs...>>,
-               list<Cs...>, typename std::enable_if<is_terminal<T>>::type> {
+               list<Cs...>, std::enable_if_t<is_terminal<T>>> {
     static constexpr bool value =
      proof<list<>,
            sequent<list<typename L::type, typename T::type,
@@ -188,7 +186,7 @@ namespace logic {
             typename... Rs, typename... Cs>
   struct proof<list<As...>,
                sequent<list<T, Ls...>, list<and_term<Ts...>, Rs...>>,
-               list<Cs...>, typename std::enable_if<is_terminal<T>>::type> {
+               list<Cs...>, std::enable_if_t<is_terminal<T>>> {
     static constexpr bool value =
      (proof<list<>,
             sequent<list<typename T::type, typename Ls::type...>,
@@ -200,7 +198,7 @@ namespace logic {
 
   template <typename T, typename... As, typename... Ls, typename... Cs>
   struct proof<list<As...>, sequent<list<T, Ls...>, list<>>, list<Cs...>,
-               typename std::enable_if<is_terminal<T>>::type> {
+               std::enable_if_t<is_terminal<T>>> {
     static constexpr bool value =
      proof<list<typename T::type, typename As::type...>,
            sequent<list<typename Ls::type...>, list<>>,
@@ -334,8 +332,8 @@ namespace logic {
   template <typename T, T Value1, T Value2, typename T1, typename... Ts>
   struct simplify<and_term<less<T, Value1>, T1>,
                   and_term<less<T, Value2>, Ts...>> {
-    using _temp = typename std::conditional<(Value2 < Value1), less<T, Value2>,
-                                            less<T, Value1>>::type;
+    using _temp =
+     std::conditional_t<(Value2 < Value1), less<T, Value2>, less<T, Value1>>;
     using type = simplify_t<and_term<_temp, T1>, and_term<Ts...>>;
   };
 
