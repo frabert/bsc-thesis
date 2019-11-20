@@ -4,6 +4,8 @@
 
 using namespace logic;
 
+template <typename T> struct print_type;
+
 int main() {
   sequent<list<and_term<greater<int, 1>,
                         or_term<less_equal<int, 2>, less_equal<int, 3>>>>,
@@ -43,9 +45,26 @@ int main() {
 
   decltype(s) s3{s2};
 
-  s3 = s2;
+  s3 = s2; // s3 € (10, 20)
 
-  auto s4 = s + s2;
+  auto s4 = s + s2; // s4 € (25, 35)
+
+  auto s5 = s4 * s3; // s5 € (250, 700)
+
+  {
+    auto a =
+     safe<int, or_term<and_term<greater_equal<int, 10>, less_equal<int, 20>>,
+                       and_term<greater<int, 25>, less_equal<int, 40>>>>::
+      make_safe<26>();
+
+    decltype(a) b = decltype(a)::make_safe<15>();
+
+    auto c = a * b;
+  }
+
+  // You can use print_type<T> to produce a compile error that will print the
+  // full type of T. Uncommenting the following line will print the type of s5
+  /// print_type<decltype(s5)> foo;
 
   safe_array<int, 4> arr{1, 2, 3, 4};
   auto idx1 = safe<std::size_t, less<std::size_t, 3>>::make_safe<2>();
@@ -54,7 +73,8 @@ int main() {
   auto idx2 = safe<std::size_t, and_term<greater<std::size_t, 1>,
                                          less<std::size_t, 5>>>::make_safe<3>();
   // The following line will not compile, as idx2 might cause an out-of-bounds
-  // access int y = arr[idx2];
+  // access.
+  /// int y = arr[idx2];
 
   return val ? 0 : 1;
   return 0;

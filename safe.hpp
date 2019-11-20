@@ -91,6 +91,8 @@ namespace logic {
               not_term<less<T, std::numeric_limits<T>::lowest()>>>,
      Ts>::type...>;
   };
+  template <typename T1, typename T2>
+  using normalize_t = typename normalize<T1, T2>::type;
 
   template <typename C1, typename C2> struct sum_type;
 
@@ -105,6 +107,8 @@ namespace logic {
      or_term<typename sum<T1, T2s>::type...>,
      typename sum_type<or_term<T1s...>, or_term<T2s...>>::type>::type;
   };
+  template <typename T1, typename T2>
+  using sum_type_t = typename sum_type<T1, T2>::type;
 
   template <typename T> constexpr bool is_subtraction_safe(T lhs, T rhs) {
     if (lhs >= 0 && rhs < 0) {
@@ -184,14 +188,16 @@ namespace logic {
      or_term<typename sub<T1, T2s>::type...>,
      typename sub_type<or_term<T1s...>, or_term<T2s...>>::type>::type;
   };
+  template <typename T1, typename T2>
+  using sub_type_t = typename sub_type<T1, T2>::type;
 
   template <typename T> constexpr std::size_t constlog2(T v) {
     if (v < 0) {
-      return 1 + log2(-(v / 2));
+      return 1 + constlog2(-(v / 2));
     } else if (v == 0) {
       return 0;
     } else {
-      return 1 + log2(v / 2);
+      return 1 + constlog2(v / 2);
     }
   }
 
@@ -203,6 +209,7 @@ namespace logic {
   template <typename T, T Value> struct invert<less_equal<T, Value>> {
     using value = less<T, Value>;
   };
+  template <typename T> using invert_t = typename invert<T>::value;
 
   // Implementation of epsilon
   template <typename T> struct bound_value_s;
@@ -219,12 +226,17 @@ namespace logic {
     using value =
      std::conditional_t<(bound_value<T1>> bound_value<T2>), T1, T2>;
   };
+  template <typename T1, typename T2>
+  using cmax_t = typename cmax<T1, T2>::value;
 
   template <typename T1, typename T2> struct cmin {
     using value =
      std::conditional_t<(bound_value<T1> < bound_value<T2>), T1, T2>;
   };
+  template <typename T1, typename T2>
+  using cmin_t = typename cmin<T1, T2>::value;
 
+  // Implementation of M'
   template <typename T1, typename T2> struct prod;
   template <typename T, T Value1, T Value2>
   struct prod<less_equal<T, Value1>, less_equal<T, Value2>> {
@@ -254,6 +266,102 @@ namespace logic {
                   "Overflow detected");
     using value = less<T, Value1 * Value2>;
   };
+  template <typename T1, typename T2>
+  using prod_t = typename prod<T1, T2>::value;
+
+  // Implementation of M
+  template <typename T1, typename T2, typename T3, typename T4, bool A, bool B,
+            bool C, bool D>
+  struct mul;
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, true, true, true, true> {
+    using _temp1 = invert_t<T2>;
+    using _temp2 = invert_t<T4>;
+    using _temp3 = invert_t<prod_t<_temp1, _temp2>>;
+
+    using value = and_term<prod_t<T1, T3>, not_term<_temp3>>;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, false, false, false, false> {
+    using _temp1 = invert_t<T2>;
+    using _temp2 = invert_t<T4>;
+    using _temp3 = invert_t<prod_t<T1, T3>>;
+
+    using value = and_term<prod_t<_temp1, _temp2>, not_term<_temp3>>;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, false, false, true, true> {
+    using _temp1 = invert_t<T2>;
+    using _temp2 = invert_t<T4>;
+    using _temp3 = invert_t<prod_t<_temp1, T3>>;
+
+    using value = and_term<prod_t<T1, _temp2>, not_term<_temp3>>;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, true, true, false, false> {
+    using value = typename mul<T3, T4, T1, T2, false, false, true, true>::value;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, true, false, true, true> {
+    using _temp1 = invert_t<T2>;
+    using _temp2 = invert_t<prod_t<_temp1, T3>>;
+
+    using value = and_term<prod_t<T1, T3>, not_term<_temp2>>;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, true, true, true, false> {
+    using value = typename mul<T3, T4, T1, T2, true, false, true, true>::value;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, true, false, false, false> {
+    using _temp1 = invert_t<T2>;
+    using _temp2 = invert_t<T4>;
+    using _temp3 = invert_t<prod_t<_temp1, _temp2>>;
+
+    using value = and_term<prod_t<T1, _temp2>, not_term<_temp3>>;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, false, false, true, false> {
+    using value =
+     typename mul<T3, T4, T1, T2, false, false, false, true>::value;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul<T1, T2, T3, T4, true, false, true, false> {
+    using _temp1 = invert_t<T2>;
+    using _temp2 = invert_t<T4>;
+    using _temp3 = invert_t<prod_t<_temp1, _temp2>>;
+
+    using _temp4 = prod_t<T1, T3>;
+    using _temp5 = cmax_t<_temp4, _temp3>;
+
+    using _temp6 = prod_t<T1, _temp2>;
+    using _temp7 = prod_t<_temp1, T3>;
+    using _temp8 = invert_t<cmin_t<_temp6, _temp7>>;
+
+    using value = and_term<_temp5, not_term<_temp8>>;
+  };
+  template <typename T1, typename T2, typename T3, typename T4>
+  using mul_t =
+   typename mul<T1, T2, T3, T4, (bound_value<T1> >= 0), (bound_value<T2> >= 0),
+                (bound_value<T3> >= 0), (bound_value<T4> >= 0)>::value;
+
+  // Calculates M(phi_1, phi_2, phi_3, phi_4) given psi_1 and psi_2
+  template <typename T1, typename T2> struct mul_helper;
+  template <typename T1, typename T2, typename T3, typename T4>
+  struct mul_helper<and_term<T1, not_term<T2>>, and_term<T3, not_term<T4>>> {
+    using value = mul_t<T1, T2, T3, T4>;
+  };
+  template <typename T1, typename T2>
+  using mul_helper_t = typename mul_helper<T1, T2>::value;
+
+  template <typename C1, typename C2> struct mul_type;
+
+  template <typename T1, typename... T2s>
+  struct mul_type<or_term<T1>, or_term<T2s...>> {
+    using type = or_term<mul_helper_t<T1, T2s>...>;
+  };
+  template <typename T1, typename T2>
+  using mul_type_t = typename mul_type<T1, T2>::type;
 
   template <typename T,
             typename C =
@@ -307,18 +415,23 @@ namespace logic {
     }
 
     template <typename C2> auto operator+(const safe<T, C2> &value) {
-      auto res =
-       safe<T, typename sum_type<typename normalize<T, typename C::type>::type,
-                                 typename normalize<T, typename C2::type>::
-                                  type>::type>::_unsafe_create(value);
+      auto res = safe<
+       T, sum_type_t<normalize_t<T, typename C::type>,
+                     normalize_t<T, typename C2::type>>>::_unsafe_create(value);
       return res;
     }
 
     template <typename C2> auto operator-(const safe<T, C2> &value) {
-      auto res =
-       safe<T, typename sub_type<typename normalize<T, typename C::type>::type,
-                                 typename normalize<T, typename C2::type>::
-                                  type>::type>::_unsafe_create(value);
+      auto res = safe<
+       T, sub_type_t<normalize_t<T, typename C::type>,
+                     normalize_t<T, typename C2::type>>>::_unsafe_create(value);
+      return res;
+    }
+
+    template <typename C2> auto operator*(const safe<T, C2> &value) {
+      auto res = safe<
+       T, mul_type_t<normalize_t<T, typename C::type>,
+                     normalize_t<T, typename C2::type>>>::_unsafe_create(value);
       return res;
     }
 
