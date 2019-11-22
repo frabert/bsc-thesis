@@ -233,34 +233,36 @@ namespace logic {
   template <typename T1, typename T2>
   using cmin_t = typename cmin<T1, T2>::type;
 
+  template <typename T> constexpr bool is_multiplication_safe(T a, T b) {
+    if ((a >= 0 && b >= 0) || (a < 0 && b < 0)) {
+      return constlog2(a) + constlog2(b) <=
+             constlog(std::numeric_limits<T>::max());
+    } else {
+      return constlog2(a) + constlog2(b) <=
+             constlog(std::numeric_limits<T>::lowest());
+    }
+  }
+
   // Implementation of M'
   template <typename T1, typename T2> struct prod;
   template <typename T, T Value1, T Value2>
   struct prod<less_equal<T, Value1>, less_equal<T, Value2>> {
-    static_assert(constlog2(Value1) + constlog2(Value2) <=
-                   constlog2(std::numeric_limits<T>::max()),
-                  "Overflow detected");
+    static_assert(is_multiplication_safe(Value1, Value2), "Overflow detected");
     using type = less_equal<T, Value1 * Value2>;
   };
   template <typename T, T Value1, T Value2>
   struct prod<less<T, Value1>, less_equal<T, Value2>> {
-    static_assert(constlog2(Value1) + constlog2(Value2) <=
-                   constlog2(std::numeric_limits<T>::max()),
-                  "Overflow detected");
+    static_assert(is_multiplication_safe(Value1, Value2), "Overflow detected");
     using type = less<T, Value1 * Value2>;
   };
   template <typename T, T Value1, T Value2>
   struct prod<less_equal<T, Value1>, less<T, Value2>> {
-    static_assert(constlog2(Value1) + constlog2(Value2) <=
-                   constlog2(std::numeric_limits<T>::max()),
-                  "Overflow detected");
+    static_assert(is_multiplication_safe(Value1, Value2), "Overflow detected");
     using type = less<T, Value1 * Value2>;
   };
   template <typename T, T Value1, T Value2>
   struct prod<less<T, Value1>, less<T, Value2>> {
-    static_assert(constlog2(Value1) + constlog2(Value2) <=
-                   constlog2(std::numeric_limits<T>::max()),
-                  "Overflow detected");
+    static_assert(is_multiplication_safe(Value1, Value2), "Overflow detected");
     using type = less<T, Value1 * Value2>;
   };
   template <typename T1, typename T2>

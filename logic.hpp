@@ -321,6 +321,7 @@ namespace logic {
     return max(a, max(b...));
   }
 
+  // Performs interval intersection
   template <typename T1, typename T2> struct simplify;
   template <typename T1, typename T2>
   using simplify_t = typename simplify<T1, T2>::type;
